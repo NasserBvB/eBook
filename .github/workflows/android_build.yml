@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Android App Bundle
         run: |
-          cd android && ./gradlew assembleRelease --no-daemon
+          cd android && ./gradlew bundleRelease --no-daemon
 
         ## sign generate apk using github secrets
       - name: Sign App Bundle
