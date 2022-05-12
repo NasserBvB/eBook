@@ -59,3 +59,5 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 /vendor/bundle/
+
+signing_key.jks.base64.txt

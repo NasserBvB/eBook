@@ -73,13 +73,22 @@ jobs:
           name: Gakko App Bundle
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
-      ## Distribute app to Firebase App Distribution for testing / use google play internal track if you have a google play account
-      - name: upload artifact to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{secrets.ANDROID_FIREBASE_APP_ID}}
-          token: ${{secrets.ANDROID_FIREBASE_TOKEN}}
-          groups: testers
-          file: ${{steps.sign_app.outputs.signedReleaseFile}}
+      # ## Distribute app to Firebase App Distribution for testing / use google play internal track if you have a google play account
+      # - name: upload artifact to Firebase App Distribution
+      #   uses: wzieba/Firebase-Distribution-Github-Action@v1
+      #   with:
+      #     appId: ${{secrets.ANDROID_FIREBASE_APP_ID}}
+      #     token: ${{secrets.ANDROID_FIREBASE_TOKEN}}
+      #     groups: testers
+      #     file: ${{steps.sign_app.outputs.signedReleaseFile}}
 
       ## upload abb to google play  using https://github.com/r0adkll/upload-google-play
+      ## Distribute  App
+      - name: Upload App to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.example
+          releaseFiles: android/app/build/outputs/bundle/release/*.aab
+          track: internal
+          inAppUpdatePriority: 2
