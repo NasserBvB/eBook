@@ -71,11 +71,11 @@ jobs:
 
       ## Distribute  App 
       - name: Create service_account.json
-        run: echo '${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}' > service_account.json
+        run: echo ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
       - name: Upload App to Google Play
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@v1.0.17
         with:
-          serviceAccountJson: service_account.json
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
           packageName: com.ebook
           releaseFiles: android/app/build/outputs/bundle/release/*.aab
           track: internal
