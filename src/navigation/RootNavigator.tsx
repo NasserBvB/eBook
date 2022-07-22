@@ -24,11 +24,7 @@ export const Root = () => {
         gestureEnabled: false,
         animationTypeForReplace: status === 'signIn' ? 'push' : 'pop',
       }}>
-      {status === 'signIn' ? (
-        <Stack.Screen name="App" component={TabNavigator} />
-      ) : (
-        <Stack.Screen name="Auth" component={AuthNavigator} />
-      )}
+      <Stack.Screen name="Auth" component={AuthNavigator} />
     </Stack.Navigator>
   );
 };

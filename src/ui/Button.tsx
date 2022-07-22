@@ -56,8 +56,8 @@ export const Button = ({
       <ButtonContainer
         borderRadius={44}
         flexDirection="row"
-        paddingVertical="m"
-        paddingHorizontal="xl"
+        paddingVertical="s"
+        paddingHorizontal="m"
         marginVertical="s"
         justifyContent="center"
         {...props}>
