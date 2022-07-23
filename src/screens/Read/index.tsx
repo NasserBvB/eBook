@@ -1,4 +1,6 @@
+import { useAuth } from 'core';
 import React, { useEffect } from 'react';
+import { useMemo } from 'react';
 import { Image, StyleSheet } from 'react-native';
 import { Button, Pressable, ScrollableScreen, Text, View } from 'ui';
 import { getDimensions } from 'utils';
@@ -8,7 +10,13 @@ import { default as wordService } from 'utils/wordService';
 const { generateOptions, generateAnswerArea } = wordService;
 
 export const Read = () => {
-  const [correctAnswer] = React.useState('FISSAA');
+  const { currentQuestion, nextQuestion, addCoins, removeCoins } = useAuth();
+  console.log('currentQuestion', currentQuestion);
+
+  const correctAnswer = useMemo(
+    () => currentQuestion?.answer || 'TEST',
+    [currentQuestion],
+  );
 
   const [letters, setLetters] = React.useState(generateOptions(correctAnswer));
   const [answerArea, setAnswerArea] = React.useState(
@@ -46,10 +54,10 @@ export const Read = () => {
       if (
         answerArea.every((cur, idx) => cur.currentLetter === correctAnswer[idx])
       ) {
-        console.log('correct');
+        nextQuestion();
+        addCoins(10);
       } else {
         reset();
-        console.log('wrong');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,34 +73,63 @@ export const Read = () => {
       filled: true,
     };
 
+    removeCoins(1);
+
     setAnswerArea(newAnswerArea);
   };
   const clearCase = (index: number) => {
-    const newAnswerArea = [...answerArea];
-    newAnswerArea[index].currentLetter = '';
-    newAnswerArea[index].filled = false;
+    if (answerArea[index].filled) {
+      const newAnswerArea = [...answerArea];
+      newAnswerArea[index].currentLetter = '';
+      newAnswerArea[index].filled = false;
 
-    const newLetters = [...letters];
-    newLetters[newAnswerArea[index].currentIndex].choosen = false;
+      const newLetters = [...letters];
+      newLetters[newAnswerArea[index].currentIndex].choosen = false;
 
-    setLetters(newLetters);
-    setAnswerArea(newAnswerArea);
+      setLetters(newLetters);
+      setAnswerArea(newAnswerArea);
+    }
   };
+
+  const { imageHeight, imageWidth } = useMemo(() => {
+    if (currentQuestion) {
+      return {
+        imageWidth:
+          getDimensions().width /
+            (currentQuestion?.assets?.length > 1 ? 2 : 1) -
+          20,
+        imageHeight:
+          (getDimensions().height * 0.8) /
+          Math.max(currentQuestion?.assets?.length, 2),
+      };
+    }
+
+    return {
+      imageWidth: getDimensions().width * 0.8,
+      imageHeight: (getDimensions().height * 0.8) / 2,
+    };
+  }, [currentQuestion]);
 
   return (
     <ScrollableScreen>
       <View style={styles.container}>
         <View style={styles.question}>
-          <Text>Answer the questions ?</Text>
+          <Text fontStyle="italic" textTransform="capitalize" fontWeight="700">
+            {currentQuestion?.question}
+          </Text>
         </View>
-        <View style={styles.image}>
-          <Image
-            source={{
-              uri: 'https://picsum.photos/id/1/200/300',
-              width: getDimensions().width,
-              height: getDimensions().height / 2,
-            }}
-          />
+        <View style={styles.images}>
+          {currentQuestion?.assets.map((cur, idx) => (
+            <Image
+              style={styles.image}
+              key={idx}
+              source={{
+                uri: cur,
+                width: imageWidth,
+                height: imageHeight,
+              }}
+            />
+          ))}
         </View>
         <View style={styles.answers}>
           {answerArea.map(({ currentLetter }, index) => (
@@ -115,7 +152,7 @@ export const Read = () => {
                 onPress={() => {
                   onPress(letter.letter, index);
                 }}>
-                <Text>{letter.letter}</Text>
+                <Text fontWeight="700">{letter.letter}</Text>
               </Pressable>
             );
           })}
@@ -125,13 +162,14 @@ export const Read = () => {
   );
 };
 
-const { width } = getDimensions();
+const { width, height } = getDimensions();
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
+    height: height * 0.8,
   },
   answers: {
     flexDirection: 'row',
@@ -155,8 +193,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     width: 25,
   },
+  images: {
+    flex: 3,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
   image: {
-    flex: 1,
+    margin: 2,
   },
   letters: {
     flexDirection: 'row',
@@ -182,9 +226,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   question: {
-    margin: 10,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
 });

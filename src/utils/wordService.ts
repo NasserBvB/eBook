@@ -1,5 +1,5 @@
+import { Question } from '../../types/Questions';
 import { Option, WordService } from '../../types/WordService';
-
 function randomizeCharacters(
   length: number,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -91,3 +91,24 @@ const wordService: WordService = {
 };
 
 export default wordService;
+
+export const generateRandomQuestions = () => {
+  const questions: Question[] = [];
+  for (let i = 0; i < 1000; i++) {
+    questions.push({
+      id: `${new Date().getTime()}q-${i + 1}`,
+      ordre: i + 1,
+      type: 'type',
+      question: `Question number ${i + 1}`,
+      assets: [
+        'https://picsum.photos/200/300',
+        'https://picsum.photos/200/300',
+        'https://picsum.photos/200/300',
+        'https://picsum.photos/200/300',
+      ],
+      answer: randomizeCharacters(5),
+    });
+  }
+
+  return questions;
+};
