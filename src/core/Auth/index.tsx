@@ -1,4 +1,5 @@
 /// Auth.tsx
+import { RewardedAd, TestIds } from 'react-native-google-mobile-ads';
 import { generateRandomQuestions } from 'utils/wordService';
 import create from 'zustand';
 import { Question } from '../../../types/Questions';
@@ -6,15 +7,15 @@ import {
   getCoins,
   getCurrentQuestion,
   getQuestions,
-  removeCoins,
-  removeCurrentQuestion,
-  removeQuestions,
   setCoins,
   // removeCurrentQuestion,
   // removeQuestions,
   setCurrentQuestion,
   setQuestions,
 } from './utils';
+const adUnitId = __DEV__
+  ? TestIds.REWARDED
+  : 'ca-app-pub-6750790982638800/3557862551';
 interface AuthState {
   questions: Question[];
   currentQuestion: Question | null;
@@ -24,6 +25,9 @@ interface AuthState {
   nextQuestion: () => void;
   addCoins: (coins: number) => void;
   removeCoins: (coins: number) => void;
+  rewardedAd: RewardedAd | null;
+  showAdModal: boolean;
+  showAd: (show: boolean) => void;
 }
 const fetchQuestions = async () => {
   // @todo: Fetch questions from API
@@ -31,18 +35,32 @@ const fetchQuestions = async () => {
   return generateRandomQuestions();
 };
 
+const initAds = async () => {
+  const rewarded = RewardedAd.createForAdRequest(adUnitId, {
+    requestNonPersonalizedAdsOnly: true,
+    keywords: ['fashion', 'clothing'],
+  });
+
+  return rewarded;
+};
+
 export const useAuth = create<AuthState>((set, get) => ({
   status: 'idle',
   questions: [],
   currentQuestion: null,
-  coins: 10,
+  coins: 50,
+  rewardedAd: null,
+  showAdModal: false,
+  showAd: (show: boolean) => set(state => ({ ...state, showAdModal: show })),
   hydrate: async () => {
     let questions: Question[];
     let currentQuestion: Question | null;
     let coins: number;
-    removeQuestions();
-    removeCurrentQuestion();
-    removeCoins();
+    // removeQuestions();
+    // removeCurrentQuestion();
+    // removeCoins();
+
+    const rewardedAd = await initAds();
 
     try {
       coins = getCoins();
@@ -51,7 +69,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         throw new Error('No coins');
       }
     } catch (error) {
-      coins = 10;
+      coins = 50;
     }
 
     try {
@@ -77,7 +95,14 @@ export const useAuth = create<AuthState>((set, get) => ({
     setQuestions(questions);
     setCurrentQuestion(currentQuestion);
 
-    set({ ...get(), questions, currentQuestion, status: 'signIn', coins });
+    set({
+      ...get(),
+      questions,
+      currentQuestion,
+      status: 'signIn',
+      coins,
+      rewardedAd,
+    });
   },
   addCoins: (coins: number) => {
     set({ ...get(), coins: get().coins + coins });

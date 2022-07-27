@@ -1,23 +1,36 @@
+import { useAd } from 'api/useAd';
 import { useAuth } from 'core';
-import React, { useEffect } from 'react';
-import { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Image, StyleSheet } from 'react-native';
+import Dialog from 'react-native-dialog';
 import { Button, Pressable, ScrollableScreen, Text, View } from 'ui';
 import { getDimensions } from 'utils';
+import { coinsRequiredPerHint } from 'utils/hint';
 import { default as wordService } from 'utils/wordService';
-// import dilmensions
 
 const { generateOptions, generateAnswerArea } = wordService;
 
 export const Read = () => {
-  const { currentQuestion, nextQuestion, addCoins, removeCoins } = useAuth();
-  console.log('currentQuestion', currentQuestion);
+  const {
+    currentQuestion,
+    nextQuestion,
+    addCoins,
+    removeCoins,
+    showAdModal,
+    showAd,
+    coins,
+  } = useAuth();
 
+  const [hintCount, setHintCount] = React.useState(0);
+  const [showFinishModal, setShowFinishModal] = React.useState({
+    show: false,
+    wrong: true,
+  });
+  const { rewarded, loaded } = useAd();
   const correctAnswer = useMemo(
     () => currentQuestion?.answer || 'TEST',
     [currentQuestion],
   );
-
   const [letters, setLetters] = React.useState(generateOptions(correctAnswer));
   const [answerArea, setAnswerArea] = React.useState(
     generateAnswerArea(correctAnswer),
@@ -54,28 +67,31 @@ export const Read = () => {
       if (
         answerArea.every((cur, idx) => cur.currentLetter === correctAnswer[idx])
       ) {
-        nextQuestion();
-        addCoins(10);
+        setShowFinishModal({ show: true, wrong: false });
       } else {
-        reset();
+        setShowFinishModal({ show: true, wrong: true });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answerArea, correctAnswer]);
 
   const help = () => {
-    const newAnswerArea = [...answerArea];
+    if (coinsPerHint > coins) {
+      showAd(true);
+    } else {
+      const newAnswerArea = [...answerArea];
 
-    const firstEmpty = newAnswerArea.findIndex(cur => !cur.filled);
-    newAnswerArea[firstEmpty] = {
-      ...newAnswerArea[firstEmpty],
-      currentLetter: newAnswerArea[firstEmpty].letter,
-      filled: true,
-    };
+      const firstEmpty = newAnswerArea.findIndex(cur => !cur.filled);
+      newAnswerArea[firstEmpty] = {
+        ...newAnswerArea[firstEmpty],
+        currentLetter: newAnswerArea[firstEmpty].letter,
+        filled: true,
+      };
 
-    removeCoins(1);
+      setHintCount(hintCount + 1);
+      removeCoins(coinsPerHint);
 
-    setAnswerArea(newAnswerArea);
+      setAnswerArea(newAnswerArea);
+    }
   };
   const clearCase = (index: number) => {
     if (answerArea[index].filled) {
@@ -110,6 +126,22 @@ export const Read = () => {
     };
   }, [currentQuestion]);
 
+  const coinsPerHint = useMemo(() => {
+    if (currentQuestion) {
+      return coinsRequiredPerHint(currentQuestion.ordre) * (hintCount + 1);
+    }
+    return 10;
+  }, [currentQuestion, hintCount]);
+
+  const getCoins = () => {
+    if (rewarded && loaded) {
+      rewarded?.show();
+    }
+  };
+  const closeModal = () => {
+    showAd(false);
+  };
+
   return (
     <ScrollableScreen>
       <View style={styles.container}>
@@ -137,7 +169,7 @@ export const Read = () => {
               <Text style={styles.answer}>{currentLetter}</Text>
             </Pressable>
           ))}
-          <Button onPress={help} label="Hint" />
+          <Button onPress={help} label={`Hint ${coinsPerHint}`} />
         </View>
         <View style={styles.letters}>
           {letters.map((letter, index) => {
@@ -152,12 +184,68 @@ export const Read = () => {
                 onPress={() => {
                   onPress(letter.letter, index);
                 }}>
-                <Text fontWeight="700">{letter.letter}</Text>
+                <Text fontWeight="700" color="white">
+                  {letter.letter}
+                </Text>
               </Pressable>
             );
           })}
         </View>
       </View>
+      <Dialog.Container
+        footerStyle={styles.footer}
+        headerStyle={styles.header}
+        onBackdropPress={closeModal}
+        visible={showAdModal}>
+        <Dialog.Title>Get More coins</Dialog.Title>
+        <Dialog.Description>
+          Want more coins for your next question?
+        </Dialog.Description>
+        <Dialog.Button
+          style={styles.cancelButton}
+          label="Cancel"
+          onPress={closeModal}
+        />
+        <Dialog.Button
+          style={styles.watchButton}
+          label="Watch"
+          onPress={getCoins}
+        />
+      </Dialog.Container>
+      <Dialog.Container
+        footerStyle={styles.footer}
+        headerStyle={styles.header}
+        onBackdropPress={() =>
+          setShowFinishModal(cur => ({ ...cur, show: false }))
+        }
+        visible={showFinishModal.show}>
+        <Dialog.Title>
+          {showFinishModal.wrong ? 'Wrong' : 'Correct'} answer
+        </Dialog.Title>
+        {showFinishModal.wrong && (
+          <Dialog.Description>
+            You can watch the video to learn how to get more coins for you to
+            solve the question
+          </Dialog.Description>
+        )}
+        <Dialog.Button
+          style={styles.cancelButton}
+          label="Watch"
+          onPress={getCoins}
+        />
+        <Dialog.Button
+          style={styles.watchButton}
+          label={showFinishModal.wrong ? 'Try again' : 'Next'}
+          onPress={() => {
+            if (!showFinishModal.wrong) {
+              addCoins(10);
+              nextQuestion();
+            }
+            reset();
+            setShowFinishModal({ wrong: true, show: false });
+          }}
+        />
+      </Dialog.Container>
     </ScrollableScreen>
   );
 };
@@ -186,6 +274,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
+  coinIcon: {
+    width: 20,
+    height: 20,
+    marginLeft: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#EB5757',
+    borderRadius: 10,
+    color: '#fff',
+  },
   answer: {
     fontSize: 30,
     margin: 10,
@@ -193,14 +291,28 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     width: 25,
   },
+  header: {
+    alignItems: 'center',
+  },
   images: {
     flex: 3,
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
   },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  hint: {
+    flexDirection: 'row',
+    backgroundColor: '#fcbd41',
+    padding: 10,
+    borderRadius: 10,
+  },
   image: {
     margin: 2,
+    borderRadius: 10,
   },
   letters: {
     flexDirection: 'row',
@@ -210,25 +322,38 @@ const styles = StyleSheet.create({
   letter: {
     padding: 10,
     borderRadius: 10,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
     width: width / 6,
     margin: 2,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    color: '#fff',
+  },
+  modalContent: {
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 'auto',
+    marginVertical: 'auto',
+  },
+  modal: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   chosen: {
-    backgroundColor: 'green',
+    backgroundColor: '#7caab9',
   },
   notChosen: {
-    backgroundColor: '#fff',
+    backgroundColor: '#219F94',
   },
   question: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
+  },
+  watchButton: {
+    backgroundColor: '#7caab9',
+    borderRadius: 10,
+    color: '#fff',
   },
 });

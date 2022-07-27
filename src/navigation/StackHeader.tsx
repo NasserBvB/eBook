@@ -2,35 +2,49 @@ import { StackHeaderProps } from '@react-navigation/stack';
 import { useAuth } from 'core';
 import React from 'react';
 import { Image, StyleSheet } from 'react-native';
-import { Text, View } from 'ui';
+import { Pressable, Text, View } from 'ui';
 
 export default function StackHeader(_props: StackHeaderProps) {
-  const { currentQuestion, questions, coins } = useAuth();
+  const { currentQuestion, coins, showAd } = useAuth();
+  const showAdModal = () => showAd(true);
   return (
     <View style={styles.container}>
       <View
-        borderColor="grey1"
-        borderWidth={1}
+        backgroundColor="primary"
         style={styles.coin}
-        paddingHorizontal="s"
+        p="s"
         borderRadius={4}>
-        <Text fontWeight="700" fontStyle="italic">
-          {currentQuestion?.ordre} / {questions?.length}
+        <Text fontWeight="700" fontStyle="italic" color="white">
+          Level {currentQuestion?.ordre}
         </Text>
       </View>
-      <View
-        borderColor="grey1"
-        borderWidth={1}
-        style={styles.coin}
-        paddingHorizontal="s"
-        borderRadius={4}>
-        <Text fontWeight="700" fontStyle="italic">
-          {coins}
-        </Text>
-        <Image
-          style={styles.coinIcon}
-          source={require('../../assets/coin.png')}
-        />
+      <View flexDirection="row">
+        <View
+          backgroundColor="primary"
+          style={styles.coin}
+          p="s"
+          borderRadius={4}>
+          <Text fontWeight="700" color="white" fontStyle="italic">
+            {coins}
+          </Text>
+          <Image
+            style={styles.coinIcon}
+            source={require('../../assets/coin.png')}
+          />
+        </View>
+        <View
+          justifyContent="center"
+          alignItems="center"
+          marginLeft="s"
+          style={styles.addCoinContainer}
+          borderRadius={4}>
+          <Pressable onPress={showAdModal}>
+            <Image
+              style={styles.addCoin}
+              source={require('../../assets/add.png')}
+            />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -45,6 +59,13 @@ const styles = StyleSheet.create({
   coin: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  addCoinContainer: {
+    backgroundColor: '#fcbd41',
+  },
+  addCoin: {
+    width: 40,
+    height: 40,
   },
   coinIcon: {
     width: 20,

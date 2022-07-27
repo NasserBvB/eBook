@@ -19,7 +19,7 @@ const BaseTheme = {
   colors: {
     text: '#212121',
     background: '#fff',
-    primary: '#219F94',
+    primary: '#7caab9',
     secondary: '#F9D371',
     muted: '#f1f3f4',
 
