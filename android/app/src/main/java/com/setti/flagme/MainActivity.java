@@ -1,4 +1,4 @@
-package com.setti.template;
+package com.setti.flagme;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

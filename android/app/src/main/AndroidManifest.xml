@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.setti.template">
+  package="com.setti.flagme">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

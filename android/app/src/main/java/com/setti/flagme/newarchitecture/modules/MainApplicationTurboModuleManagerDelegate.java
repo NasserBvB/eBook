@@ -1,4 +1,4 @@
-package com.setti.template.newarchitecture.modules;
+package com.setti.flagme.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

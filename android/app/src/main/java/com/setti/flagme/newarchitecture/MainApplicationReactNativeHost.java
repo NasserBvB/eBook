@@ -1,4 +1,4 @@
-package com.setti.template.newarchitecture;
+package com.setti.flagme.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.setti.template.BuildConfig;
-import com.setti.template.newarchitecture.components.MainComponentsRegistry;
-import com.setti.template.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.setti.flagme.BuildConfig;
+import com.setti.flagme.newarchitecture.components.MainComponentsRegistry;
+import com.setti.flagme.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

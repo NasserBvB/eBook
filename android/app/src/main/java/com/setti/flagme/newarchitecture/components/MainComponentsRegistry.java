@@ -1,4 +1,4 @@
-package com.setti.template.newarchitecture.components;
+package com.setti.flagme.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
