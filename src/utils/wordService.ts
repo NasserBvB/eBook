@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Question } from '../../types/Questions';
 import { Option, WordService } from '../../types/WordService';
 function randomizeCharacters(
@@ -18,11 +19,12 @@ function randomizeCharacters(
 export const generateOptions = (answer: string): Option[] => {
   const length = answer.length;
 
-  const complementaryLetters = answer + randomizeCharacters(10 - length);
+  const complementaryLetters =
+    answer + randomizeCharacters(Math.floor((length * 5) / 3) - length);
 
   const filledIndexes: Record<string, number[]> = {};
 
-  return randomizeCharacters(10, complementaryLetters)
+  return randomizeCharacters(Math.floor((length * 5) / 3), complementaryLetters)
     .split('')
     .map(letter => {
       const indexes = getLetterIndexesInAnswer(answer, letter);
@@ -92,22 +94,34 @@ const wordService: WordService = {
 
 export default wordService;
 
-export const generateRandomQuestions = () => {
+export const generateRandomQuestions = async () => {
+  const { data } = await axios.get(
+    'http://www.geognos.com/api/en/countries/info/all.json',
+  );
+
   const questions: Question[] = [];
-  for (let i = 0; i < 1000; i++) {
-    questions.push({
-      id: `${new Date().getTime()}q-${i + 1}`,
-      ordre: i + 1,
-      type: 'type',
-      question: `Question number ${i + 1}`,
-      assets: [
-        'https://picsum.photos/200/300',
-        'https://picsum.photos/200/300',
-        'https://picsum.photos/200/300',
-        'https://picsum.photos/200/300',
-      ],
-      answer: randomizeCharacters(5),
-    });
+  let i = 1;
+
+  for (const code in data.Results) {
+    if (Object.prototype.hasOwnProperty.call(data.Results, code)) {
+      const { Name } = data.Results[code];
+
+      if (Name.includes(' ')) {
+        continue;
+      }
+
+      const image = `http://www.geognos.com/api/en/countries/flag/${code}.png`;
+
+      questions.push({
+        id: `${new Date().getTime()}q-${i}`,
+        ordre: i,
+        type: 'type',
+        question: 'Guess country ?',
+        assets: [image],
+        answer: Name.toUpperCase(),
+      });
+      i++;
+    }
   }
 
   return questions;

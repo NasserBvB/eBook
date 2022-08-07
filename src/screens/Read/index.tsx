@@ -27,13 +27,11 @@ export const Read = () => {
     wrong: true,
   });
   const { rewarded, loaded } = useAd();
-  const correctAnswer = useMemo(
-    () => currentQuestion?.answer || 'TEST',
-    [currentQuestion],
+  const [letters, setLetters] = React.useState(
+    generateOptions(currentQuestion?.answer || 'TEST'),
   );
-  const [letters, setLetters] = React.useState(generateOptions(correctAnswer));
   const [answerArea, setAnswerArea] = React.useState(
-    generateAnswerArea(correctAnswer),
+    generateAnswerArea(currentQuestion?.answer || 'TEST'),
   );
 
   const onPress = (letter: string, _index: number) => {
@@ -58,21 +56,27 @@ export const Read = () => {
   };
 
   const reset = () => {
-    setAnswerArea(generateAnswerArea(correctAnswer));
-    setLetters(generateOptions(correctAnswer));
+    setAnswerArea(generateAnswerArea(currentQuestion?.answer || ''));
+    setLetters(generateOptions(currentQuestion?.answer || ''));
   };
 
   useEffect(() => {
-    if (answerArea.every(cur => cur.filled)) {
+    if (
+      answerArea.every(cur => !!cur.filled) &&
+      currentQuestion?.answer &&
+      currentQuestion?.answer.length > 0
+    ) {
       if (
-        answerArea.every((cur, idx) => cur.currentLetter === correctAnswer[idx])
+        answerArea.every(
+          (cur, idx) => cur.currentLetter === currentQuestion.answer[idx],
+        )
       ) {
         setShowFinishModal({ show: true, wrong: false });
       } else {
         setShowFinishModal({ show: true, wrong: true });
       }
     }
-  }, [answerArea, correctAnswer]);
+  }, [answerArea, currentQuestion]);
 
   const help = () => {
     if (coinsPerHint > coins) {
@@ -113,9 +117,9 @@ export const Read = () => {
         imageWidth:
           getDimensions().width /
             (currentQuestion?.assets?.length > 1 ? 2 : 1) -
-          20,
+          40,
         imageHeight:
-          (getDimensions().height * 0.8) /
+          (getDimensions().height * 0.6) /
           Math.max(currentQuestion?.assets?.length, 2),
       };
     }
@@ -141,6 +145,14 @@ export const Read = () => {
   const closeModal = () => {
     showAd(false);
   };
+
+  useEffect(() => {
+    const answer = currentQuestion?.answer || '';
+    if (answer.length) {
+      setLetters(generateOptions(answer));
+      setAnswerArea(generateAnswerArea(answer));
+    }
+  }, [currentQuestion]);
 
   return (
     <ScrollableScreen>
@@ -169,8 +181,8 @@ export const Read = () => {
               <Text style={styles.answer}>{currentLetter}</Text>
             </Pressable>
           ))}
-          <Button onPress={help} label={`Hint ${coinsPerHint}`} />
         </View>
+        <Button margin="s" onPress={help} label={`Hint ${coinsPerHint}`} />
         <View style={styles.letters}>
           {letters.map((letter, index) => {
             return (

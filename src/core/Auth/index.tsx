@@ -7,6 +7,9 @@ import {
   getCoins,
   getCurrentQuestion,
   getQuestions,
+  removeCoins,
+  removeCurrentQuestion,
+  removeQuestions,
   setCoins,
   // removeCurrentQuestion,
   // removeQuestions,
@@ -32,7 +35,7 @@ interface AuthState {
 const fetchQuestions = async () => {
   // @todo: Fetch questions from API
   // For now, we'll just return a mock list of questions
-  return generateRandomQuestions();
+  return await generateRandomQuestions();
 };
 
 const initAds = async () => {
@@ -56,9 +59,9 @@ export const useAuth = create<AuthState>((set, get) => ({
     let questions: Question[];
     let currentQuestion: Question | null;
     let coins: number;
-    // removeQuestions();
-    // removeCurrentQuestion();
-    // removeCoins();
+    removeQuestions();
+    removeCurrentQuestion();
+    removeCoins();
 
     const rewardedAd = await initAds();
 
