@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Question } from '../../types/Questions';
 import { Option, WordService } from '../../types/WordService';
+import data from "./data.json";
 function randomizeCharacters(
   length: number,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -95,16 +96,12 @@ const wordService: WordService = {
 export default wordService;
 
 export const generateRandomQuestions = async () => {
-  const { data } = await axios.get(
-    'http://www.geognos.com/api/en/countries/info/all.json',
-  );
-
   const questions: Question[] = [];
   let i = 1;
-
-  for (const code in data.Results) {
-    if (Object.prototype.hasOwnProperty.call(data.Results, code)) {
-      const { Name } = data.Results[code];
+  const results = data.Results as any;
+  for (const code in results) {
+    if (Object.prototype.hasOwnProperty.call(results, code)) {
+      const { Name } = results[code];
 
       if (Name.includes(' ')) {
         continue;
