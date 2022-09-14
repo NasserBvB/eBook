@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Question } from '../../types/Questions';
 import { Option, WordService } from '../../types/WordService';
-import data from "./data.json";
+import data from './data.json';
 function randomizeCharacters(
   length: number,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -107,7 +107,7 @@ export const generateRandomQuestions = async () => {
         continue;
       }
 
-      const image = `http://www.geognos.com/api/en/countries/flag/${code}.png`;
+      const image = `https://flagcdn.com/108x81/${code.toLowerCase()}.png`;
 
       questions.push({
         id: `${new Date().getTime()}q-${i}`,

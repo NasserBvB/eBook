@@ -302,6 +302,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#000',
     borderBottomWidth: 1,
     width: 25,
+    color: '#000',
   },
   header: {
     alignItems: 'center',
