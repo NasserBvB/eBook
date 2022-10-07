@@ -1,0 +1,19 @@
+Atomic eBook lets you read your favorite books on the go. Choose from a massive collection of popular books that you can download in a jiffy.
+
+Atomic eBook is free, and optimized for Android devices.
+
+- Epub3 format support
+- User-created collections for sorting your books
+- Turn pages with a tap or swipe
+- Never lose your place in the book
+- Landscape or portrait orientation is lockable
+- Easy navigation inside the book
+- Search for text inside books
+- Night-reading mode is easy on the eyes
+- Adjust font size with a tap
+- Login with your existing eBooks.com account
+- Online synchronization for bookmarks, highlights, notes and current reading position with all your Android and iOS devices
+- 3rd-party (imported) book support
+- Free classics at your fingertips immediately
+- Shop for ebooks within the app
+- Buy New York Times bestsellers as well as technical, professional and academic books
